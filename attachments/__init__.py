@@ -1,0 +1,1 @@
+# Aplicación attachments para gestión de archivos adjuntos

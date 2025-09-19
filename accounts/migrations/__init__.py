@@ -1,0 +1,1 @@
+# Migraciones de la aplicación accounts

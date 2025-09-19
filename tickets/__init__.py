@@ -1,0 +1,1 @@
+# Aplicación tickets para gestión de tickets de reclamación

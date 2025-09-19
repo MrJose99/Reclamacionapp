@@ -1,0 +1,1 @@
+# Aplicación audit para auditoría y bitácora del sistema

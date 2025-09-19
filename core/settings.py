@@ -40,6 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bootstrap5',
+    # Aplicaciones del proyecto
+    'accounts',
+    'tickets',
+    'attachments',
+    'audit',
+    # Aplicaciones existentes
     'User',
     'Home',
 ]
@@ -75,6 +81,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -85,6 +92,8 @@ DATABASES = {
     }
 }
 
+# Configuración del modelo de usuario personalizado
+AUTH_USER_MODEL = 'accounts.Usuario'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -122,6 +131,15 @@ USE_TZ = True       # Usar zona horaria (timezone-aware)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = 'static/'
+
+# Media files (archivos subidos por usuarios)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Configuraciones para archivos adjuntos
+# Tamaño máximo de archivo: 25MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
