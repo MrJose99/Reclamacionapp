@@ -59,9 +59,9 @@
                             <p><strong>Creado:</strong> {{ ticket.created_at|date:"d/m/Y H:i" }}</p>
                             <p><strong>Garantía:</strong> 
                                 {% if ticket.garantia_vigente %}
-                                    <span class="badge badge-success">Vigente</span>
+                                    <span class="badge bg-success">Vigente</span>
                                 {% else %}
-                                    <span class="badge badge-danger">Vencida</span>
+                                    <span class="badge bg-danger">Vencida</span>
                                 {% endif %}
                             </p>
                         </div>
