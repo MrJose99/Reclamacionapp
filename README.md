@@ -42,7 +42,6 @@ core/
 │   ├── models.py      # Adjunto con validaciones
 │   ├── views.py       # Subida y descarga de archivos
 │   └── forms.py       # Formulario de adjuntos
-├── audit/             # Sistema de auditoría y bitácora
 │   ├── models.py      # Evento de auditoría
 │   ├── views.py       # Consulta de eventos
 │   └── signals.py     # Captura automática de eventos
@@ -57,7 +56,6 @@ core/
 │   ├── accounts/      # Templates de usuarios
 │   ├── tickets/       # Templates de tickets
 │   ├── attachments/   # Templates de adjuntos
-│   └── audit/         # Templates de auditoría
 └── media/             # Archivos subidos por usuarios
 ```
 
@@ -80,29 +78,22 @@ core/
 
 ### Comentario (tickets.Comentario)
 - Comentarios en tickets
-- Visibilidad pública/privada
-- Autor y timestamp
+- Autor 
 - Relación con ticket
 
 ### Adjunto (attachments.Adjunto)
 - Archivos multimedia
 - Relación genérica con tickets/comentarios
-- Validación de tipos y tamaños
 - Organización por carpetas
-- Checksums para integridad
 
-### Evento (audit.Evento)
-- Bitácora de auditoría
-- Registro de todas las acciones
-- Datos JSON adicionales
-- Trazabilidad completa
+
 
 ## Instalación y Configuración
 
 ### Requisitos
 - Python 3.11+
 - Django 5.2.5
-- SQLite (desarrollo) / MariaDB (producción)
+- SQLite 
 
 ### Instalación Rápida
 1. Clonar el repositorio
@@ -204,31 +195,7 @@ Después de ejecutar `crear_datos_ejemplo`:
 - **Empleados**: empleado1, empleado2 (password: password123)
 - **Superadmin**: superadmin (password: admin123456)
 
-## Funcionalidades Implementadas
 
-### Autenticación y Autorización
-- Registro de usuarios con validaciones
-- Login/logout con redirección por roles
-- Control de acceso basado en roles
-- Dashboards específicos por tipo de usuario
-
-### Gestión de Tickets
-- Creación con formulario completo
-- Listado con filtros y búsqueda
-- Detalle con comentarios y adjuntos
-- Cambio de estados por empleados
-- Asignación automática y manual
-
-### Sistema de Adjuntos
-- Subida de archivos con validación
-- Descarga controlada por permisos
-- Organización por tickets
-- Eliminación solo por superadmin
-
-### Auditoría
-- Registro automático de eventos
-- Consulta de bitácora por ticket
-- Trazabilidad completa de acciones
 
 ## Tecnologías Utilizadas
 
@@ -239,34 +206,3 @@ Después de ejecutar `crear_datos_ejemplo`:
 - **Archivos**: Sistema de archivos local
 - **Auditoría**: Django Signals
 
-## Estado del Proyecto
-
-### Completado
-- Modelos de datos completos
-- Sistema de autenticación y roles
-- Vistas basadas en funciones
-- Templates responsive con Bootstrap
-- Sistema de adjuntos
-- Auditoría automática
-- Comandos de gestión
-- Dashboards básicos
-
-### En Desarrollo
-- Templates adicionales
-- Notificaciones por email
-- API REST
-- Reportes y estadísticas avanzadas
-
-## Contribución
-
-Para contribuir al proyecto:
-1. Fork del repositorio
-2. Crear rama feature
-3. Implementar cambios
-4. Ejecutar tests
-5. Crear Pull Request
-
----
-
-**Sistema desarrollado con Django 5.2.5 | Python 3.11+**
-**Funciones en español | Sin emojis | Vistas basadas en funciones**

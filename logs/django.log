@@ -11952,3 +11952,4 @@ INFO 2025-10-27 19:15:33,070 basehttp 20000 14036 - Broken pipe from ('127.0.0.1
 INFO 2025-10-27 19:15:50,734 basehttp 20000 22412 "GET / HTTP/1.1" 200 8247
 WARNING 2025-10-27 19:15:50,768 log 20000 22412 Not Found: /favicon.ico
 INFO 2025-10-27 19:15:50,769 basehttp 20000 22412 - Broken pipe from ('127.0.0.1', 54388)
+INFO 2025-10-27 20:08:43,520 autoreload 2648 24292 Watching for file changes with StatReloader
