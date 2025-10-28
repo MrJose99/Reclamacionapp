@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Tickets sin asignar{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Tickets sin asignar</h2>
+    <a href="{% url 'tickets:listar_tickets' %}" class="btn btn-outline-secondary btn-sm">Ver todos los tickets</a>
+  </div>
+
+  <!-- Filtros -->
+  <form method="get" class="card card-body mb-3">
+    <div class="row g-2">
+      <div class="col-md-4">
+        <label class="form-label">Prioridad</label>
+        <select name="prioridad" class="form-select">
+          <option value="">Todas</option>
+          {% for valor, nombre in prioridades %}
+            <option value="{{ valor }}" {% if prioridad_filtro == valor %}selected{% endif %}>{{ nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Categoría</label>
+        <select name="categoria" class="form-select">
+          <option value="">Todas</option>
+          {% for cat in categorias %}
+            <option value="{{ cat.id }}" {% if categoria_filtro == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Tabla de tickets -->
+  {% if page_obj %}
+    <div class="card">
+      <div class="card-body">
+        <p class="text-muted">Mostrando {{ page_obj|length }} ticket(s) disponible(s)</p>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Asunto</th>
+                <th>Cliente</th>
+                <th>Categoría</th>
+                <th>Prioridad</th>
+                <th>Creado</th>
+                <th class="text-end">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ticket in page_obj %}
+              <tr>
+                <td>
+                  <a href="{% url 'tickets:detalle_ticket' ticket.id %}">{{ ticket.asunto }}</a>
+                </td>
+                <td>{{ ticket.cliente.get_full_name|default:ticket.cliente.username }}</td>
+                <td>{{ ticket.categoria.nombre }}</td>
+                <td>
+                  <span class="badge bg-{% if ticket.prioridad == 'critica' %}dark{% elif ticket.prioridad == 'alta' %}danger{% elif ticket.prioridad == 'media' %}warning{% else %}success{% endif %}">
+                    {{ ticket.get_prioridad_display }}
+                  </span>
+                </td>
+                <td>{{ ticket.created_at|date:"d/m/Y H:i" }}</td>
+                <td class="text-end">
+                  <a href="{% url 'tickets:tomar_ticket' ticket.id %}" class="btn btn-sm btn-success">
+                    <i class="bi bi-hand-thumbs-up"></i> Tomar ticket
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <nav>
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info">No hay tickets sin asignar en este momento.</div>
+  {% endif %}
+</div>
+{% endblock %}

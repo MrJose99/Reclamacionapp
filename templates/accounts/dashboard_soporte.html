@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Soporte{% endblock %}
+{% block content %}
+<div class="py-4">
+  <h2 class="mb-3">Dashboard Soporte</h2>
+  <a href="{% url 'tickets:tickets_sin_asignar' %}" class="btn btn-primary">
+  <i class="bi bi-inbox"></i> Ver tickets sin asignar ({{ tickets_sin_asignar }})
+</a>
+  <div class="row g-3">
+    <div class="col-md-3">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small">Asignados</div>
+          <div class="fs-4 fw-semibold">{{ tickets_asignados }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small">Activos</div>
+          <div class="fs-4 fw-semibold">{{ tickets_activos }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card h-100 border-warning shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small">Vencidos</div>
+          <div class="fs-4 fw-semibold text-warning">{{ tickets_vencidos }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card h-100 border-info shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small">Sin asignar</div>
+          <div class="fs-4 fw-semibold text-info">{{ tickets_sin_asignar }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-4 shadow-sm">
+    <div class="card-header">Tickets urgentes</div>
+    <div class="table-responsive">
+      <table class="table mb-0 align-middle table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Prioridad</th>
+            <th>Estado</th>
+            <th>Creado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tickets_urgentes %}
+          <tr>
+            <td><a href="{% url 'tickets:detalle_ticket' t.id %}">#{{ t.id }}</a></td>
+            <td>{{ t.cliente.get_full_name|default:t.cliente.username }}</td>
+            <td>{{ t.get_prioridad_display }}</td>
+            <td>{{ t.get_estado_display }}</td>
+            <td>{{ t.created_at|date:"Y-m-d H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center py-3">Sin tickets urgentes</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mt-4 shadow-sm">
+    <div class="card-header">Tickets recientes</div>
+    <div class="table-responsive">
+      <table class="table mb-0 align-middle table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Estado</th>
+            <th>Actualizado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tickets_recientes %}
+          <tr>
+            <td><a href="{% url 'tickets:detalle_ticket' t.id %}">#{{ t.id }}</a></td>
+            <td>{{ t.cliente.get_full_name|default:t.cliente.username }}</td>
+            <td>{{ t.get_estado_display }}</td>
+            <td>{{ t.updated_at|date:"Y-m-d H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center py-3">Sin tickets recientes</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

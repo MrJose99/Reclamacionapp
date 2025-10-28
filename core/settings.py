@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-import os
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v3m^!&3ycf&i*$)%k=i0+f5(=q&$-+jb8325e)gty^p!3_g@f6'
+SECRET_KEY = 'django-insecure-ej&%*@ej&%*@ej&%*@ej&%*@ej&%*@ej&%*@ej&%*@ej&%*@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*' ,'https://jose1999.pythonanywhere.com/']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 
 # Application definition
@@ -38,14 +38,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Third party apps
     'crispy_forms',
     'crispy_bootstrap5',
-    # Aplicaciones del proyecto
+
+    # Local apps
     'accounts',
     'tickets',
     'attachments',
     'audit',
-    # Aplicaciones existentes
     'User',
     'Home',
 ]
@@ -65,10 +67,11 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -79,8 +82,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -92,8 +93,21 @@ DATABASES = {
     }
 }
 
-# Configuración del modelo de usuario personalizado
-AUTH_USER_MODEL = 'accounts.Usuario'
+# Para producción con MariaDB/MySQL:
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'sistema_quejas',
+#         'USER': 'tu_usuario',
+#         'PASSWORD': 'tu_password',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'sql_mode': 'traditional',
+#         }
+#     }
+# }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -121,27 +135,185 @@ LANGUAGE_CODE = 'es'
 
 TIME_ZONE = 'America/Guatemala'
 
-# Configuraciones internacionalización
-USE_I18N = True     # Habilitar internacionalización
-USE_L10N = True     # Habilitar formatos locales
-USE_TZ = True       # Usar zona horaria (timezone-aware)
+USE_I18N = True
+
+USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = 'static/'
 
-# Media files (archivos subidos por usuarios)
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+# Media files (uploads)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Configuraciones para archivos adjuntos
-# Tamaño máximo de archivo: 25MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024
-DATA_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Custom user model
+AUTH_USER_MODEL = 'accounts.Usuario'
+
+# Crispy forms configuration
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25MB
+
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para desarrollo
+# Para producción:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'tu_email@gmail.com'
+# EMAIL_HOST_PASSWORD = 'tu_password_de_aplicacion'
+
+DEFAULT_FROM_EMAIL = 'Sistema de Quejas <noreply@sistemaquejas.com>'
+SITE_URL = 'http://localhost:8000'  # Cambiar en producción
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'django.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'tickets.services': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
+
+# Crear directorio de logs si no existe
+os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+
+# Security settings (para producción)
+if not DEBUG:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_REDIRECT_EXEMPT = []
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    X_FRAME_OPTIONS = 'DENY'
+
+# Cache configuration (para producción)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# Session configuration
+SESSION_COOKIE_AGE = 3600  # 1 hora
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Message framework
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+    messages.DEBUG: 'debug',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+}
+
+# Configuración específica del sistema de tickets
+TICKET_SETTINGS = {
+    'AUTO_ASSIGN_TICKETS': True,  # Asignación automática de tickets
+    'MAX_TICKETS_PER_AGENT': 10,  # Máximo de tickets por agente
+    'NOTIFICATION_ENABLED': True,  # Notificaciones por email habilitadas
+    'GUARANTEE_VALIDATION': True,  # Validación automática de garantía
+    'ALLOWED_FILE_EXTENSIONS': [
+        '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg',  # Imágenes
+        '.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv',   # Videos
+        '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt',  # Documentos
+        '.zip', '.rar', '.7z'  # Archivos comprimidos
+    ],
+    'MAX_FILE_SIZE_MB': 25,  # Tamaño máximo de archivo en MB
+    'MAX_FILES_PER_UPLOAD': 10,  # Máximo de archivos por subida
+    'TICKET_RESPONSE_TIME_HOURS': {
+        'critica': 1,
+        'alta': 4,
+        'media': 24,
+        'baja': 72,
+    },
+    'DEFAULT_GUARANTEE_DAYS': 365,  # Días de garantía por defecto
+}
+
+# Configuración de roles y permisos
+ROLE_PERMISSIONS = {
+    'cliente': [
+        'tickets.add_ticket',
+        'tickets.view_own_ticket',
+        'tickets.add_comment_to_own_ticket',
+        'attachments.add_attachment_to_own_ticket',
+    ],
+    'soporte': [
+        'tickets.view_ticket',
+        'tickets.change_ticket_status',
+        'tickets.assign_ticket',
+        'tickets.add_comment',
+        'tickets.derive_to_technician',
+        'attachments.view_attachment',
+        'attachments.add_attachment',
+    ],
+    'soporte_tecnico': [
+        'tickets.view_assigned_ticket',
+        'tickets.change_repair_status',
+        'tickets.add_technical_comment',
+        'attachments.view_attachment',
+        'attachments.add_technical_attachment',
+    ],
+    'superadmin': [
+        'all_permissions',
+    ],
+}

@@ -1,0 +1,22 @@
+Hola {{ agente.get_full_name }},
+
+Se le ha asignado un nuevo ticket para su revisión.
+
+INFORMACIÓN DEL TICKET
+======================
+Número: #{{ ticket.id|slice:":8" }}
+Cliente: {{ ticket.cliente.get_full_name }}
+Asunto: {{ ticket.asunto }}
+Prioridad: {{ ticket.get_prioridad_display }}
+Categoría: {{ ticket.categoria.nombre }}
+Creado: {{ ticket.created_at|date:"d/m/Y H:i" }}
+
+Para revisar el ticket completo, visite: {{ url_ticket }}
+
+PRÓXIMOS PASOS:
+- Revisar la información del cliente y los documentos adjuntos
+- Validar la garantía si aplica
+- Comunicarse con el cliente si necesita información adicional
+- Cambiar el estado del ticket según corresponda
+
+Sistema de Gestión de Quejas y Reclamos

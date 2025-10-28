@@ -1,0 +1,26 @@
+Estimado/a {{ cliente.get_full_name }},
+
+Su ticket ha sido creado exitosamente en nuestro sistema de quejas y reclamos.
+
+INFORMACIÓN DEL TICKET
+======================
+Número de Ticket: #{{ ticket.id|slice:":8" }}
+Asunto: {{ ticket.asunto }}
+Categoría: {{ ticket.categoria.nombre }}
+Prioridad: {{ ticket.get_prioridad_display }}
+Estado: {{ ticket.get_estado_display }}
+Fecha de Creación: {{ ticket.created_at|date:"d/m/Y H:i" }}
+{% if ticket.numero_factura %}Número de Factura: {{ ticket.numero_factura }}{% endif %}
+{% if ticket.numero_serie %}Número de Serie: {{ ticket.numero_serie }}{% endif %}
+
+Su ticket será revisado por nuestro equipo de soporte y recibirá una respuesta pronto.
+
+Para ver el ticket completo, visite: {{ url_ticket }}
+
+¿QUÉ SIGUE?
+- Su ticket será asignado automáticamente a un agente de soporte
+- Recibirá notificaciones por email sobre cualquier actualización
+- Puede agregar comentarios o archivos adicionales en cualquier momento
+
+Este es un mensaje automático, por favor no responda a este email.
+Sistema de Gestión de Quejas y Reclamos

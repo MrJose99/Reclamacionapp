@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Detalle del Ticket{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Ticket #{{ ticket.id|slice:":8" }}</h2>
+            
+            <!-- Información del Ticket -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ ticket.asunto }}</h5>
+                    <p class="card-text"><strong>Descripción:</strong> {{ ticket.descripcion }}</p>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                           <!-- ESTADO DEL TICKET -->
+                            <p><strong>Estado:</strong> 
+                                
+                                    <span class="badge bg-secondary">
+                                        {{ ticket.get_estado_display }}
+                                    </span>
+                            </p>
+
+                            <!-- PRIORIDAD DEL TICKET -->
+                            <p><strong>Prioridad:</strong> 
+                                {% if ticket.prioridad == 'critica' %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> {{ ticket.get_prioridad_display }}
+                                    </span>
+                                {% elif ticket.prioridad == 'alta' %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-exclamation-circle-fill"></i> {{ ticket.get_prioridad_display }}
+                                    </span>
+                                {% elif ticket.prioridad == 'media' %}
+                                    <span class="badge bg-info text-dark">
+                                        <i class="bi bi-info-circle-fill"></i> {{ ticket.get_prioridad_display }}
+                                    </span>
+                                {% elif ticket.prioridad == 'baja' %}
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-dash-circle-fill"></i> {{ ticket.get_prioridad_display }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        {{ ticket.get_prioridad_display }}
+                                    </span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Categoría:</strong> {{ ticket.categoria }}</p>
+                            <p><strong>Tipo:</strong> {{ ticket.get_tipo_reclamo_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Cliente:</strong> {{ ticket.cliente.get_full_name }}</p>
+                            <p><strong>Agente:</strong> {{ ticket.agente.get_full_name|default:"Sin asignar" }}</p>
+                            <p><strong>Técnico:</strong> {{ ticket.tecnico.get_full_name|default:"Sin asignar" }}</p>
+                            <p><strong>Creado:</strong> {{ ticket.created_at|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Garantía:</strong> 
+                                {% if ticket.garantia_vigente %}
+                                    <span class="badge badge-success">Vigente</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Vencida</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Información de factura -->
+                    <hr>
+                    <p><strong>Factura:</strong> {{ ticket.numero_factura }}</p>
+                    {% if ticket.numero_serie %}
+                        <p><strong>Número de Serie:</strong> {{ ticket.numero_serie }}</p>
+                    {% endif %}
+                    {% if ticket.fecha_compra %}
+                        <p><strong>Fecha de Compra:</strong> {{ ticket.fecha_compra|date:"d/m/Y" }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Archivos Adjuntos del Ticket -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>Archivos Adjuntos</h5>
+                </div>
+                <div class="card-body">
+                    {% if adjuntos %}
+                        <div class="row">
+                            {% for adjunto in adjuntos %}
+                                <div class="col-md-4 mb-2">
+                                    {% if adjunto.es_imagen %}
+                                        <a href="{{ adjunto.archivo.url }}" target="_blank">
+                                            <img src="{{ adjunto.archivo.url }}" class="img-thumbnail" alt="{{ adjunto.nombre_original }}">
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ adjunto.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-file"></i> {{ adjunto.nombre_original }}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No hay archivos adjuntos.</p>
+                    {% endif %}
+                    
+                    <!-- Formulario para subir más archivos -->
+                    {% if puede_editar or user.puede_gestionar_tickets %}
+                        <hr>
+                        <h6>Agregar más archivos</h6>
+                        <form method="post" enctype="multipart/form-data" action="{% url 'tickets:agregar_adjuntos' ticket.id %}">
+                            {% csrf_token %}
+                            {{ adjunto_form|crispy }}
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="fas fa-upload"></i> Subir Archivos
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Comentarios -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>Comentarios ({{ comentarios.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if comentarios %}
+                        {% for comentario in comentarios %}
+                            <div class="media mb-3 p-3 border rounded">
+                                <div class="media-body">
+                                    <h6 class="mt-0">
+                                        {{ comentario.autor.get_full_name }}
+                                        <small class="text-muted">- {{ comentario.created_at|date:"d/m/Y H:i" }}</small>
+                                        {% if comentario.visibilidad == 'privado' %}
+                                            <span class="badge badge-warning">Privado</span>
+                                        {% endif %}
+                                        {% if comentario.es_respuesta_inicial %}
+                                            <span class="badge badge-info">Primera Respuesta</span>
+                                        {% endif %}
+                                    </h6>
+                                    <p>{{ comentario.texto|linebreaks }}</p>
+                                    
+                                    <!-- Adjuntos del comentario -->
+                                    {% with comentario_adjuntos=comentario.adjuntos_comentario.all %}
+                                        {% if comentario_adjuntos %}
+                                            <div class="mt-2">
+                                                <strong>Archivos adjuntos:</strong>
+                                                <div class="row mt-2">
+                                                    {% for adj in comentario_adjuntos %}
+                                                        <div class="col-md-3 mb-2">
+                                                            {% if adj.es_imagen %}
+                                                                <a href="{{ adj.archivo.url }}" target="_blank">
+                                                                    <img src="{{ adj.archivo.url }}" class="img-thumbnail" alt="{{ adj.nombre_original }}">
+                                                                </a>
+                                                            {% else %}
+                                                                <a href="{{ adj.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                                    <i class="fas fa-file"></i> {{ adj.nombre_original }}
+                                                                </a>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No hay comentarios aún.</p>
+                    {% endif %}
+                    
+                    <!-- Formulario para agregar comentario -->
+                    {% if ticket.esta_abierto and ticket.puede_ser_comentado_por %}                        <hr>
+                        <h6>Agregar Comentario</h6>
+                        <form method="post" enctype="multipart/form-data" action="{% url 'tickets:agregar_comentario' ticket.id %}">
+                            {% csrf_token %}
+                            {{ comentario_form|crispy }}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-comment"></i> Enviar Comentario
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar con acciones -->
+        <div class="col-md-4">
+            <!-- Cambiar Estado -->
+            {% if user.puede_gestionar_tickets %}
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">Gestión del Ticket</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'tickets:cambiar_estado' ticket.id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="estado">Cambiar Estado:</label>
+                                <select name="estado" id="estado" class="form-control">
+                                    {% for value, label in ticket.ESTADOS %}
+                                        <option value="{{ value }}" {% if ticket.estado == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="motivo">Motivo (opcional):</label>
+                                <textarea name="motivo" id="motivo" class="form-control" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-sync"></i> Actualizar Estado
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Asignar Agente/Técnico -->
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">Asignación</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'tickets:asignar_personal' ticket.id %}">
+                            {% csrf_token %}
+                            {{ asignar_form|crispy }}
+                            <button type="submit" class="btn btn-info btn-block">
+                                <i class="fas fa-user-plus"></i> Asignar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Acciones rápidas -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Acciones</h6>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'tickets:listar_tickets' %}" class="btn btn-secondary btn-block mb-2">
+                        <i class="fas fa-arrow-left"></i> Volver a la Lista
+                    </a>
+                    {% if puede_editar %}
+                        <a href="{% url 'tickets:editar' ticket.id %}" class="btn btn-warning btn-block mb-2">
+                            <i class="fas fa-edit"></i> Editar Ticket
+                        </a>
+                    {% endif %}
+                    {% if user.puede_gestionar_tickets %}
+                        <button type="button" class="btn btn-success btn-block mb-2" data-toggle="modal" data-target="#resolverModal">
+                            <i class="fas fa-check"></i> Marcar como Resuelto
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para resolver ticket -->
+<div class="modal fade" id="resolverModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Resolver Ticket</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form method="post" action="{% url 'tickets:resolver' ticket.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="resolucion">Descripción de la Resolución:</label>
+                        <textarea name="resolucion" id="resolucion" class="form-control" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Resolver Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

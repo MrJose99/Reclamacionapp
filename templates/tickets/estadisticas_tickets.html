@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Estadísticas de Tickets{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <h2 class="mb-4"><i class="bi bi-graph-up"></i> Estadísticas de Tickets</h2>
+
+  <!-- Resumen general -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center card-stats">
+        <div class="card-body">
+          <h5 class="card-title">Total de Tickets</h5>
+          <h3 class="fw-bold text-primary">{{ total_tickets }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center card-stats warning">
+        <div class="card-body">
+          <h5 class="card-title">Tickets sin Asignar</h5>
+          <h3 class="fw-bold text-warning">{{ tickets_sin_asignar }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Distribuciones -->
+  <div class="row mb-4">
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header bg-light fw-bold">
+          <i class="bi bi-bar-chart-line"></i> Tickets por Estado
+        </div>
+        <div class="card-body">
+          <canvas id="chartEstado"></canvas>
+          <ul class="mt-3 list-group list-group-flush">
+            {% for e in tickets_por_estado %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ e.estado|title }}
+              <span class="badge bg-primary rounded-pill">{{ e.count }}</span>
+            </li>
+            {% empty %}
+            <li class="list-group-item text-center">No hay datos disponibles</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header bg-light fw-bold">
+          <i class="bi bi-flag"></i> Tickets por Prioridad
+        </div>
+        <div class="card-body">
+          <canvas id="chartPrioridad"></canvas>
+          <ul class="mt-3 list-group list-group-flush">
+            {% for p in tickets_por_prioridad %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ p.prioridad|title }}
+              <span class="badge bg-secondary rounded-pill">{{ p.count }}</span>
+            </li>
+            {% empty %}
+            <li class="list-group-item text-center">No hay datos disponibles</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categorías -->
+  <div class="row mb-4">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header bg-light fw-bold">
+          <i class="bi bi-tags"></i> Tickets por Categoría
+        </div>
+        <div class="card-body">
+          <canvas id="chartCategoria"></canvas>
+          <table class="table mt-3">
+            <thead class="table-light">
+              <tr>
+                <th>Categoría</th>
+                <th>Cantidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in tickets_por_categoria %}
+              <tr>
+                <td>{{ c.categoria__nombre }}</td>
+                <td>{{ c.count }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="2" class="text-center">No hay datos.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if tickets_por_empleado %}
+  <div class="row mb-4">
+    <div class="col-lg-12">
+      <div class="card border-top border-primary">
+        <div class="card-header bg-light fw-bold">
+          <i class="bi bi-person-badge"></i> Distribución por Empleado (Superadmin)
+        </div>
+        <div class="card-body">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>Empleado</th>
+                <th>Tickets Asignados</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for te in tickets_por_empleado %}
+              <tr>
+                <td>{{ te.empleado.get_full_name|default:te.empleado.username }}</td>
+                <td>{{ te.count }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="2" class="text-center">Sin registros.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Estado
+  const ctxEstado = document.getElementById("chartEstado");
+  if(ctxEstado){
+    new Chart(ctxEstado, {
+      type: "doughnut",
+      data: {
+        labels: [{% for e in tickets_por_estado %}"{{ e.estado|title }}",{% endfor %}],
+        datasets: [{
+          data: [{% for e in tickets_por_estado %}{{ e.count }},{% endfor %}],
+          backgroundColor: ["#0d6efd","#198754","#ffc107","#dc3545","#6f42c1","#20c997","#fd7e14","#adb5bd"]
+        }]
+      },
+      options: { plugins: { legend: { position: "bottom" } } }
+    });
+  }
+
+  // Prioridad
+  const ctxPrior = document.getElementById("chartPrioridad");
+  if(ctxPrior){
+    new Chart(ctxPrior, {
+      type: "pie",
+      data: {
+        labels: [{% for p in tickets_por_prioridad %}"{{ p.prioridad|title }}",{% endfor %}],
+        datasets: [{
+          data: [{% for p in tickets_por_prioridad %}{{ p.count }},{% endfor %}],
+          backgroundColor: ["#198754","#ffc107","#dc3545","#6f42c1"]
+        }]
+      },
+      options: { plugins: { legend: { position: "bottom" } } }
+    });
+  }
+
+  // Categoría
+  const ctxCat = document.getElementById("chartCategoria");
+  if(ctxCat){
+    new Chart(ctxCat, {
+      type: "bar",
+      data: {
+        labels: [{% for c in tickets_por_categoria %}"{{ c.categoria__nombre }}",{% endfor %}],
+        datasets: [{
+          label: "Tickets",
+          data: [{% for c in tickets_por_categoria %}{{ c.count }},{% endfor %}],
+          backgroundColor: "#0d6efd"
+        }]
+      },
+      options: { responsive:true, plugins: { legend: { display: false } } }
+    });
+  }
+});
+</script>
+{% endblock %}

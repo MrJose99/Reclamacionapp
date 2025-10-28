@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Perfil de {{ usuario.get_full_name|default:usuario.username }}{% endblock %}
+{% block content %}
+<div class="py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Perfil de usuario</h2>
+    <div class="d-flex gap-2">
+      <a href="{% url 'accounts:editar_usuario' usuario.id %}" class="btn btn-primary btn-sm">Editar</a>
+      <a href="{% url 'accounts:listar_usuarios' %}" class="btn btn-outline-secondary btn-sm">Volver</a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="mb-3">{{ usuario.get_full_name|default:usuario.username }}</h5>
+          <div class="mb-2"><strong>Email:</strong> {{ usuario.email|default:"—" }}</div>
+          <div class="mb-2"><strong>Rol:</strong>
+            {% include "accounts/partials/_badges_usuario.html" with usuario=usuario show_role=True %}
+          </div>
+          <div class="mb-2"><strong>Estado:</strong>
+            {% if usuario.estado == 'activo' %}
+              <span class="badge text-bg-success">Activo</span>
+            {% else %}
+              <span class="badge text-bg-secondary">Inactivo</span>
+            {% endif %}
+          </div>
+          <div class="mb-2"><strong>Teléfono:</strong> {{ usuario.telefono|default:"—" }}</div>
+          <div class="mb-2"><strong>Dirección:</strong> {{ usuario.direccion|default:"—" }}</div>
+          <div class="mb-2"><strong>Especialidad:</strong> {{ usuario.especialidad|default:"—" }}</div>
+          <div class="mb-2"><strong>Máx. tickets:</strong> {{ usuario.max_tickets_simultaneos }}</div>
+          <div class="mb-2"><strong>Última actividad:</strong> {{ usuario.ultima_actividad|date:"Y-m-d H:i"|default:"—" }}</div>
+          <div class="mb-2"><strong>Creado:</strong> {{ usuario.created_at|date:"Y-m-d H:i" }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Métricas</span>
+          <span class="small text-muted">Carga: {{ usuario.get_porcentaje_carga_trabajo|floatformat:1 }}%</span>
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-md-3 mb-3">
+              <div class="text-muted small">Asignados</div>
+              <div class="fs-4 fw-semibold">{{ usuario.get_tickets_totales_count }}</div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="text-muted small">Activos</div>
+              <div class="fs-4 fw-semibold">{{ usuario.get_tickets_activos_count }}</div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="text-muted small">Resueltos</div>
+              <div class="fs-4 fw-semibold">{{ usuario.get_tickets_resueltos_count }}</div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="text-muted small">Tasa resolución</div>
+              <div class="fs-4 fw-semibold">{{ usuario.get_tasa_resolucion|floatformat:1 }}%</div>
+            </div>
+          </div>
+
+          <hr>
+
+          <h6>Tickets recientes</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>ID</th>
+                  <th>Cliente</th>
+                  <th>Estado</th>
+                  <th>Prioridad</th>
+                  <th>Actualizado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in tickets_recientes %}
+                <tr>
+                  <td><a href="{% url 'tickets:detalle' t.id %}">#{{ t.id }}</a></td>
+                  <td>{{ t.cliente.get_full_name|default:t.cliente.username }}</td>
+                  <td><span class="badge text-bg-secondary">{{ t.get_estado_display }}</span></td>
+                  <td>{{ t.get_prioridad_display }}</td>
+                  <td>{{ t.updated_at|date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center py-3">Sin tickets recientes.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

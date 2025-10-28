@@ -4,8 +4,11 @@ from . import views
 app_name = 'attachments'
 
 urlpatterns = [
-    # URLs para gestión de adjuntos
-    # path('subir/', views.subir_adjunto, name='subir'),
-    # path('<uuid:adjunto_id>/', views.ver_adjunto, name='ver'),
-    # path('<uuid:adjunto_id>/eliminar/', views.eliminar_adjunto, name='eliminar'),
+    # Gestión de adjuntos
+    path('subir/<uuid:ticket_id>/', views.subir_adjunto, name='subir_adjunto'),
+    path('descargar/<uuid:adjunto_id>/', views.descargar_adjunto, name='descargar_adjunto'),
+    path('eliminar/<uuid:adjunto_id>/', views.eliminar_adjunto, name='eliminar_adjunto'),
+
+    # Listado (solo superadmin)
+    path('', views.listar_adjuntos, name='listar_adjuntos'),
 ]

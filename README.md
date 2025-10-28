@@ -9,30 +9,55 @@ Sistema web desarrollado en Django para la gestión de quejas y reclamos de clie
 ### Roles de Usuario
 - **Cliente**: Puede crear tickets, adjuntar evidencias, comentar en sus tickets y consultar el estado
 - **Empleado**: Puede gestionar tickets asignados, cambiar estados, comentar y solicitar información adicional
-- **Administrador**: Acceso completo al sistema, gestión de usuarios y configuración
+- **Superadministrador**: Acceso completo al sistema, gestión de usuarios y configuración
 
-### Funcionalidades
-- ✅ Registro y autenticación de usuarios
-- ✅ Creación de tickets con número de factura obligatorio
-- ✅ Sistema de comentarios con visibilidad pública/privada
-- ✅ Adjuntos multimedia (imágenes, videos, documentos PDF)
-- ✅ Estados de ticket: Abierto → En revisión → En espera de cliente → Resuelto → Cerrado
-- ✅ Sistema de auditoría y bitácora completa
-- ✅ Categorización y priorización de tickets
-- ✅ Panel de administración completo
+### Funcionalidades Implementadas
+- Sistema de autenticación con roles específicos
+- Creación de tickets con número de factura obligatorio
+- Sistema de comentarios con visibilidad pública/privada
+- Adjuntos multimedia (imágenes, videos, documentos PDF)
+- Estados de ticket: Abierto → En revisión → En espera de cliente → Resuelto → Cerrado
+- Sistema de auditoría y bitácora completa
+- Categorización y priorización de tickets
+- Panel de administración completo
+- Dashboards específicos por rol
+- Sistema de filtros y búsqueda
+- Paginación de resultados
 
 ## Estructura del Proyecto
 
 ```
 core/
 ├── accounts/          # Gestión de usuarios extendidos
+│   ├── models.py      # Usuario con roles
+│   ├── views.py       # Vistas de autenticación y dashboards
+│   ├── forms.py       # Formularios de registro y perfil
+│   └── urls.py        # URLs de la aplicación
 ├── tickets/           # Modelos principales de tickets
+│   ├── models.py      # Ticket, Categoria, Comentario
+│   ├── views.py       # Gestión completa de tickets
+│   ├── forms.py       # Formularios de tickets y comentarios
+│   └── management/    # Comandos personalizados
 ├── attachments/       # Gestión de archivos adjuntos
+│   ├── models.py      # Adjunto con validaciones
+│   ├── views.py       # Subida y descarga de archivos
+│   └── forms.py       # Formulario de adjuntos
 ├── audit/             # Sistema de auditoría y bitácora
+│   ├── models.py      # Evento de auditoría
+│   ├── views.py       # Consulta de eventos
+│   └── signals.py     # Captura automática de eventos
 ├── User/              # Aplicación de usuarios (existente)
 ├── Home/              # Aplicación principal (existente)
 ├── core/              # Configuración del proyecto
+│   ├── settings.py    # Configuración principal
+│   ├── urls.py        # URLs principales
+│   └── utils.py       # Utilidades generales
 ├── templates/         # Plantillas HTML
+│   ├── base.html      # Template base con navegación
+│   ├── accounts/      # Templates de usuarios
+│   ├── tickets/       # Templates de tickets
+│   ├── attachments/   # Templates de adjuntos
+│   └── audit/         # Templates de auditoría
 └── media/             # Archivos subidos por usuarios
 ```
 
@@ -41,7 +66,8 @@ core/
 ### Usuario (accounts.Usuario)
 - Extiende AbstractUser de Django
 - Campos adicionales: teléfono, fecha_nacimiento, dirección, rol, estado
-- Roles: cliente, empleado, admin
+- Roles: cliente, empleado, superadmin
+- Managers personalizados para consultas específicas
 
 ### Ticket (tickets.Ticket)
 - ID único UUID
@@ -50,17 +76,20 @@ core/
 - Categoría y prioridad
 - Estados del ciclo de vida
 - Relaciones con cliente y agente
+- Timestamps y auditoría
 
 ### Comentario (tickets.Comentario)
 - Comentarios en tickets
 - Visibilidad pública/privada
 - Autor y timestamp
+- Relación con ticket
 
 ### Adjunto (attachments.Adjunto)
 - Archivos multimedia
 - Relación genérica con tickets/comentarios
 - Validación de tipos y tamaños
 - Organización por carpetas
+- Checksums para integridad
 
 ### Evento (audit.Evento)
 - Bitácora de auditoría
@@ -73,30 +102,58 @@ core/
 ### Requisitos
 - Python 3.11+
 - Django 5.2.5
-- SQLite (por defecto)
+- SQLite (desarrollo) / MariaDB (producción)
 
-### Instalación
+### Instalación Rápida
 1. Clonar el repositorio
-2. Instalar dependencias:
+2. Crear entorno virtual:
    ```bash
-   pip install django crispy-forms crispy-bootstrap5
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   venv\Scripts\activate     # Windows
    ```
-3. Ejecutar migraciones:
+3. Instalar dependencias básicas:
+   ```bash
+   pip install django django-crispy-forms crispy-bootstrap5
+   ```
+4. Ejecutar migraciones:
    ```bash
    python manage.py migrate
    ```
-4. Crear superusuario:
+5. Crear superusuario:
    ```bash
    python manage.py createsuperuser
    ```
-5. Crear datos de ejemplo (opcional):
+6. Actualizar rol del superusuario:
+   ```bash
+   python manage.py shell
+   >>> from accounts.models import Usuario
+   >>> user = Usuario.objects.get(username='tu_usuario')
+   >>> user.rol = 'superadmin'
+   >>> user.save()
+   >>> exit()
+   ```
+7. Crear datos de ejemplo:
    ```bash
    python manage.py crear_datos_ejemplo
    ```
-6. Ejecutar servidor:
+8. Ejecutar servidor:
    ```bash
    python manage.py runserver
    ```
+
+### Configuración para Producción (MariaDB)
+1. Instalar mysqlclient:
+   ```bash
+   pip install mysqlclient
+   ```
+2. Crear base de datos en MariaDB:
+   ```sql
+   CREATE DATABASE sistema_quejas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+3. Descomentar configuración de MariaDB en `settings.py`
+4. Configurar credenciales de base de datos
+5. Ejecutar migraciones
 
 ## Configuración
 
@@ -123,11 +180,10 @@ core/
 5. **Cerrado** - Confirmación final
 6. **Rechazado** - Ticket no procede (alternativo)
 
-### Proceso de Auditoría
-- Todos los eventos se registran automáticamente
-- Signals de Django para captura automática
-- Datos JSON para información adicional
-- Trazabilidad por usuario y timestamp
+### Roles y Permisos
+- **Cliente**: Crear tickets, comentar, ver sus propios tickets
+- **Empleado**: Gestionar tickets asignados, cambiar estados, comentarios privados
+- **Superadmin**: Acceso completo, gestión de usuarios, eliminación de archivos
 
 ## Comandos de Gestión
 
@@ -136,29 +192,70 @@ core/
 python manage.py crear_datos_ejemplo --usuarios 5 --tickets 10
 ```
 
-## Seguridad
+### Acceso al Sistema
+- **URL**: http://127.0.0.1:8000/
+- **Admin**: http://127.0.0.1:8000/admin/
+- **Login**: http://127.0.0.1:8000/accounts/login/
+- **Registro**: http://127.0.0.1:8000/accounts/registro/
 
-- Control de acceso por roles
-- Validación de archivos adjuntos
-- Límites de tamaño y tipo de archivo
-- Checksums para integridad de archivos
-- Timestamps en UTC
+### Usuarios de Ejemplo
+Después de ejecutar `crear_datos_ejemplo`:
+- **Clientes**: cliente1, cliente2 (password: password123)
+- **Empleados**: empleado1, empleado2 (password: password123)
+- **Superadmin**: superadmin (password: admin123456)
 
-## API y Extensibilidad
+## Funcionalidades Implementadas
 
-El sistema está preparado para:
-- Implementación de API REST
-- Notificaciones por email
-- Integración con sistemas externos
-- Escalabilidad horizontal
+### Autenticación y Autorización
+- Registro de usuarios con validaciones
+- Login/logout con redirección por roles
+- Control de acceso basado en roles
+- Dashboards específicos por tipo de usuario
+
+### Gestión de Tickets
+- Creación con formulario completo
+- Listado con filtros y búsqueda
+- Detalle con comentarios y adjuntos
+- Cambio de estados por empleados
+- Asignación automática y manual
+
+### Sistema de Adjuntos
+- Subida de archivos con validación
+- Descarga controlada por permisos
+- Organización por tickets
+- Eliminación solo por superadmin
+
+### Auditoría
+- Registro automático de eventos
+- Consulta de bitácora por ticket
+- Trazabilidad completa de acciones
 
 ## Tecnologías Utilizadas
 
 - **Backend**: Django 5.2.5
-- **Base de Datos**: SQLite (configurable)
-- **Frontend**: Bootstrap 5 + Crispy Forms
+- **Base de Datos**: SQLite (desarrollo) / MariaDB (producción)
+- **Frontend**: Bootstrap 5 + Bootstrap Icons
+- **Formularios**: Django Crispy Forms
 - **Archivos**: Sistema de archivos local
-- **Auditoría**: Signals de Django
+- **Auditoría**: Django Signals
+
+## Estado del Proyecto
+
+### Completado
+- Modelos de datos completos
+- Sistema de autenticación y roles
+- Vistas basadas en funciones
+- Templates responsive con Bootstrap
+- Sistema de adjuntos
+- Auditoría automática
+- Comandos de gestión
+- Dashboards básicos
+
+### En Desarrollo
+- Templates adicionales
+- Notificaciones por email
+- API REST
+- Reportes y estadísticas avanzadas
 
 ## Contribución
 
@@ -169,10 +266,7 @@ Para contribuir al proyecto:
 4. Ejecutar tests
 5. Crear Pull Request
 
-## Licencia
-
-Proyecto desarrollado para sistema de gestión de quejas y reclamos.
-
 ---
 
-**Desarrollado con Django 5.2.5 | Python 3.11+**
+**Sistema desarrollado con Django 5.2.5 | Python 3.11+**
+**Funciones en español | Sin emojis | Vistas basadas en funciones**

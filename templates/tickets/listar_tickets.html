@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Tickets - Sistema de Quejas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        {% if user.es_cliente %}
+            Mis Tickets
+        {% elif user.es_empleado %}
+            Tickets Asignados
+        {% else %}
+            Todos los Tickets
+        {% endif %}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        {% if user.es_cliente %}
+        <a href="{% url 'tickets:crear_ticket' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nuevo Ticket
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="busqueda" value="{{ busqueda }}" 
+                       placeholder="Buscar por factura, asunto...">
+            </div>
+            <div class="col-md-2">
+                <select name="estado" class="form-control">
+                    <option value="">Todos los estados</option>
+                    {% for value, label in estados %}
+                    <option value="{{ value }}" {% if estado_filtro == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="prioridad" class="form-control">
+                    <option value="">Todas las prioridades</option>
+                    {% for value, label in prioridades %}
+                    <option value="{{ value }}" {% if prioridad_filtro == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="categoria" class="form-control">
+                    <option value="">Todas las categorías</option>
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria.id }}" {% if categoria_filtro == categoria.id|stringformat:"s" %}selected{% endif %}>
+                        {{ categoria.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+                <a href="{% url 'tickets:listar_tickets' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de Tickets -->
+{% if page_obj %}
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Cliente</th>
+                        <th>Estado</th>
+                        <th>Prioridad</th>
+                        <th>Categoría</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in page_obj %}
+                    <tr class="ticket-priority-{{ ticket.prioridad }}">
+                        <td>
+                            <strong>{{ ticket.asunto }}</strong><br>
+                            <small class="text-muted">{{ ticket.numero_factura }}</small>
+                        </td>
+                        <td>
+                            {% if not user.es_cliente %}
+                                {{ ticket.cliente.get_full_name|default:ticket.cliente.username }}
+                            {% else %}
+                                <span class="text-muted">Mi ticket</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if ticket.estado == 'abierto' %}warning{% elif ticket.estado == 'resuelto' %}success{% elif ticket.estado == 'cerrado' %}secondary{% elif ticket.estado == 'rechazado' %}danger{% else %}info{% endif %}">
+                                {{ ticket.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if ticket.prioridad == 'critica' %}dark{% elif ticket.prioridad == 'alta' %}danger{% elif ticket.prioridad == 'media' %}warning{% else %}success{% endif %}">
+                                {{ ticket.get_prioridad_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if ticket.categoria %}
+                                {{ ticket.categoria.nombre }}
+                            {% else %}
+                                <span class="text-muted">Sin categoría</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ ticket.created_at|date:"d/m/Y H:i" }}<br>
+                            <small class="text-muted">{{ ticket.tiempo_transcurrido.days }} días</small>
+                        </td>
+                        <td>
+                            <a href="{% url 'tickets:detalle_ticket' ticket.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Ver
+                            </a>
+                            
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginación de tickets">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if busqueda %}&busqueda={{ busqueda }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}">Primera</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if busqueda %}&busqueda={{ busqueda }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}">Anterior</a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                </li>
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if busqueda %}&busqueda={{ busqueda }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}">Siguiente</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if busqueda %}&busqueda={{ busqueda }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}">Última</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-ticket-perforated display-1 text-muted"></i>
+    <h3 class="mt-3">No hay tickets</h3>
+    <p class="text-muted">
+        {% if user.es_cliente %}
+            No has creado ningún ticket aún.
+        {% else %}
+            No hay tickets que coincidan con los filtros seleccionados.
+        {% endif %}
+    </p>
+    {% if user.es_cliente %}
+    <a href="{% url 'tickets:crear_ticket' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Crear Primer Ticket
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

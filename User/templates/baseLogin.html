@@ -19,7 +19,7 @@
         <a class="btn btn-outline-light" href="{% url 'Logout' %}">Cerrar sesión</a>
       {% else %}
         <a class="btn btn-outline-light" href="{% url 'Login' %}">Iniciar sesión</a>
-        <a class="btn btn-light ms-2" href="{% url 'Registro' %}">Registrarse</a>
+        <a class="btn btn-light ms-2" href="{% url 'accounts:registro_usuario' %}">Registrarse</a>
       {% endif %}
     </div>
   </div>

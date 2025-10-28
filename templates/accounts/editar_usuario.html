@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Editar Usuario{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Editar Usuario</h2>
+  <p class="text-muted">Modifica los datos del usuario existente.</p>
+  <hr>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="mt-3">
+      <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+      <a href="{% url 'accounts:listar_usuarios' %}" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

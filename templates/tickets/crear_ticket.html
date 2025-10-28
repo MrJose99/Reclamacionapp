@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Crear Ticket - Sistema de Quejas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Crear Nuevo Ticket</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'tickets:listar_tickets' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a Tickets
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Información del Ticket</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    
+                    <div class="mb-3">
+                        <label for="id_archivos" class="form-label">Archivos Adjuntos</label>
+                        <input type="file" name="archivos" class="form-control" id="id_archivos" 
+                               multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx">
+                        <div class="form-text">
+                            Puede seleccionar múltiples archivos. Formatos permitidos: JPG, PNG, GIF, PDF, DOC. Tamaño máximo: 25MB por archivo
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'tickets:listar_tickets' %}" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Crear Ticket
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Información Importante</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-info-circle"></i> Consejos para tu ticket</h6>
+                    <ul class="mb-0 small">
+                        <li>Sé específico en la descripción</li>
+                        <li>Incluye fechas y horarios</li>
+                        <li>Adjunta evidencias si las tienes</li>
+                        <li>Selecciona la prioridad adecuada</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

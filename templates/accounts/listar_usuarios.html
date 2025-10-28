@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block content %}
+<div class="py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Gestión de usuarios</h2>
+    <div>
+      <a href="{% url 'accounts:estadisticas_usuarios' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-graph-up"></i> Estadísticas
+      </a>
+      <a href="{% url 'accounts:crear_usuario' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-person-plus"></i> Crear usuario
+      </a>
+    </div>
+  </div>
+
+  <form method="get" class="card card-body mb-3 shadow-sm">
+    <div class="row g-2">
+      <div class="col-md-4">
+        <input type="text" name="busqueda" value="{{ busqueda }}" class="form-control" placeholder="Buscar por nombre, email o username">
+      </div>
+      <div class="col-md-3">
+        <select name="rol" class="form-select">
+          <option value="">Todos los roles</option>
+          {% for val, label in roles %}
+            <option value="{{ val }}" {% if rol_filtro == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select name="estado" class="form-select">
+          <option value="">Todos los estados</option>
+          {% for val, label in estados %}
+            <option value="{{ val }}" {% if estado_filtro == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-primary" type="submit">Filtrar</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Tickets activos</th>
+            <th>Creado</th>
+            <th>Última actividad</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in page_obj %}
+          <tr>
+            <td>
+              <a href="{% url 'accounts:detalle_usuario' u.id %}">
+                {{ u.get_full_name|default:u.username }}
+              </a>
+            </td>
+            <td>{{ u.email|default:"—" }}</td>
+            <td>
+              {% include "accounts/partials/_badges_usuario.html" with usuario=u show_role=True %}
+            </td>
+            <td>
+              {% if u.estado == 'activo' %}
+                <span class="badge text-bg-success">Activo</span>
+              {% else %}
+                <span class="badge text-bg-secondary">Inactivo</span>
+              {% endif %}
+            </td>
+            <td>{{ u.get_tickets_activos_count }}</td>
+            <td>{{ u.created_at|date:"Y-m-d" }}</td>
+            <td>{{ u.ultima_actividad|date:"Y-m-d H:i"|default:"—" }}</td>
+            <td class="text-end">
+              <div class="btn-group">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'accounts:editar_usuario' u.id %}">Editar</a>
+                {% if u.estado == 'activo' %}
+                  <form method="post" action="{% url 'accounts:cambiar_estado_usuario' u.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="estado" value="inactivo">
+                    <button class="btn btn-sm btn-outline-warning" type="submit">Desactivar</button>
+                  </form>
+                {% else %}
+                  <form method="post" action="{% url 'accounts:cambiar_estado_usuario' u.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="estado" value="activo">
+                    <button class="btn btn-sm btn-outline-success" type="submit">Activar</button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" class="text-center py-4">No se encontraron usuarios.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer">
+      {% include "accounts/partials/_paginacion.html" with page_obj=page_obj %}
+    </div>
+  </div>
+</div>
+{% endblock %}

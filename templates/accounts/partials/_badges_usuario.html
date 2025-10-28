@@ -1,0 +1,19 @@
+{% if show_role %}
+  {% if usuario.rol == 'superadmin' %}
+    <span class="badge text-bg-dark">Administrador</span>
+  {% elif usuario.rol == 'soporte_tecnico' %}
+    <span class="badge text-bg-primary">Técnico</span>
+  {% elif usuario.rol == 'soporte' %}
+    <span class="badge text-bg-info text-dark">Soporte</span>
+  {% elif usuario.rol == 'empleado' %}
+    <span class="badge text-bg-secondary">Empleado</span>
+  {% else %}
+    <span class="badge text-bg-light text-dark">Cliente</span>
+  {% endif %}
+{% endif %}
+{% if usuario.es_vip %}
+  <span class="badge text-bg-warning text-dark">VIP</span>
+{% endif %}
+{% if usuario.tiene_restricciones %}
+  <span class="badge text-bg-danger">Restricción</span>
+{% endif %}

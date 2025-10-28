@@ -23,11 +23,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # URLs de las aplicaciones existentes
-    path('', include('User.urls')),
+    #path('', include('User.urls')),
+    path('', include('accounts.urls')),
     path('Inicio/', include('Home.urls')),
     
     # URLs de las nuevas aplicaciones
-    path('accounts/', include('accounts.urls')),
     path('tickets/', include('tickets.urls')),
     path('attachments/', include('attachments.urls')),
     path('audit/', include('audit.urls')),

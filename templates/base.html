@@ -1,80 +1,325 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Mi Proyecto{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    {% load static %}
-    <style>
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: row;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Quejas y Reclamos{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+
+ <style>
+    .sidebar {
+        min-height: 100vh;
+        background-color: #f8f9fa;
+    }
+    .navbar-brand {
+        font-weight: bold;
+    }
+    .card-stats {
+        border-left: 4px solid #007bff;
+    }
+    .card-stats.success {
+        border-left-color: #28a745;
+    }
+    .card-stats.warning {
+        border-left-color: #ffc107;
+    }
+    .card-stats.danger {
+        border-left-color: #dc3545;
+    }
+    .ticket-priority-alta {
+        border-left: 4px solid #dc3545;
+    }
+    .ticket-priority-media {
+        border-left: 4px solid #ffc107;
+    }
+    .ticket-priority-baja {
+        border-left: 4px solid #28a745;
+    }
+    .ticket-priority-critica {
+        border-left: 4px solid #6f42c1;
+    }
+
+    /* Estilos para redes sociales */
+    .footer {
+        background: #212529 !important;
+    }
+
+    .social-media-links {
+        display: flex;
+        gap: 15px;
+    }
+
+    .social-icon {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: white;
+        font-size: 22px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .social-icon:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(255,255,255,0.2);
+        color: white;
+    }
+
+    .social-icon.facebook {
+        background: #1877F2;
+    }
+
+    .social-icon.facebook:hover {
+        background: #145dbf;
+    }
+
+    .social-icon.instagram {
+        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    }
+
+    .social-icon.instagram:hover {
+        opacity: 0.9;
+    }
+
+    .social-icon.tiktok {
+        background: #000000;
+        border: 2px solid white;
+    }
+
+    .social-icon.tiktok:hover {
+        background: #333333;
+    }
+
+    .social-icon.whatsapp {
+        background: #25D366;
+    }
+
+    .social-icon.whatsapp:hover {
+        background: #1da851;
+    }
+
+    @media (max-width: 768px) {
+        .social-media-links {
+            gap: 10px;
         }
-        .sidebar {
-            min-width: 250px;
-            max-width: 250px;
-            background-color: #343a40;
-            color: white;
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
         }
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-        }
-        .sidebar .nav-link:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-        @media (max-width: 768px) {
-            .sidebar {
-                display: none;
-            }
-            body {
-                flex-direction: column;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body>
+    <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% if user.is_authenticated %}{{ user.get_dashboard_url }}{% else %}{% url 'accounts:iniciar_sesion' %}{% endif %}">
+            <i class="bi bi-headset"></i> Sistema de Quejas
+        </a>
 
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
+        <div class="collapse navbar-collapse" id="navbarNav">
+            {% if user.is_authenticated %}
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'tickets:listar_tickets' %}">
+                        <i class="bi bi-ticket-perforated"></i> Tickets
+                    </a>
+                </li>
 
-<div class="d-flex flex-grow-1">
-    <!-- Sidebar -->
-    <nav class="sidebar p-3">
-        <h4 class="text-white">Menú</h4>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="#">Inicio</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#menu1" role="button">
-                    Reclamos <span class="ms-1">&#9662;</span>
-                </a>
-                <div class="collapse" id="menu1">
-                    <ul class="nav flex-column ms-3">
-                        <li><a class="nav-link" href="#">Nuevo reclamo</a></li>
-                        <li><a class="nav-link" href="#">Mis reclamos</a></li>
+                {% if user.es_cliente %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'tickets:crear_ticket' %}">
+                        <i class="bi bi-plus-circle"></i> Crear Ticket
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if user.puede_gestionar_tickets %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'tickets:tickets_sin_asignar' %}">
+                        <i class="bi bi-inbox"></i> Sin Asignar
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'tickets:estadisticas_tickets' %}">
+                        <i class="bi bi-graph-up"></i> Estadísticas
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if user.es_superadmin %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-gear"></i> Administración
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'accounts:listar_usuarios' %}">Usuarios</a></li>
+                        <li><a class="dropdown-item" href="{% url 'attachments:listar_adjuntos' %}">Adjuntos</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/admin/">Panel Admin</a></li>
                     </ul>
-                </div>
-            </li>
-            <li>
-                <a class="nav-link" href="{% url 'Logout' %}">Cerrar Sesión</a>
-            </li>
-        </ul>
-    </nav>
+                </li>
+                {% endif %}
+            </ul>
 
-    <!-- Contenido principal -->
-    <main class="flex-fill p-4">
-        {% block content %}{% endblock %}
-    </main>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
+                        <span class="badge bg-secondary">{{ user.get_rol_display }}</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'accounts:perfil_usuario' %}">Mi Perfil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:cerrar_sesion' %}">Cerrar Sesión</a></li>
+                    </ul>
+                </li>
+            </ul>
+            {% else %}
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:iniciar_sesion' %}">Iniciar Sesión</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:registro_usuario' %}">Registrarse</a>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<!-- Contenido principal -->
+<div class="container-fluid">
+    <div class="row">
+        {% if user.is_authenticated %}
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'dashboard' in request.resolver_match.url_name %}active{% endif %}" href="{{ user.get_dashboard_url }}">
+                            <i class="bi bi-house"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'listar_tickets' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'tickets:listar_tickets' %}">
+                            <i class="bi bi-ticket-perforated"></i> 
+                            {% if user.es_cliente %}Mis Tickets{% else %}Tickets{% endif %}
+                        </a>
+                    </li>
+
+                    {% if user.es_cliente %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'crear_ticket' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'tickets:crear_ticket' %}">
+                            <i class="bi bi-plus-circle"></i> Nuevo Ticket
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% if user.puede_gestionar_tickets %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'tickets_sin_asignar' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'tickets:tickets_sin_asignar' %}">
+                            <i class="bi bi-inbox"></i> Sin Asignar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'estadisticas' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'tickets:estadisticas_tickets' %}">
+                            <i class="bi bi-graph-up"></i> Estadísticas
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                {% if user.es_superadmin %}
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Administración</span>
+                </h6>
+                <ul class="nav flex-column mb-2">
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'listar_usuarios' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'accounts:listar_usuarios' %}">
+                            <i class="bi bi-people"></i> Usuarios
+                        </a>
+                    </li>
+                    <!-- Sección de Auditoría eliminada -->
+                </ul>
+                {% endif %}
+            </div>
+        </nav>
+
+        <!-- Contenido principal -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        {% else %}
+        <main class="col-12">
+        {% endif %}
+            <!-- Mensajes -->
+            {% if messages %}
+            <div class="mt-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Contenido de la página -->
+            {% block content %}{% endblock %}
+        </main>
+    </div>
 </div>
 
-<!-- Pie de página -->
-<footer class="bg-dark text-white text-center py-3 mt-auto">
-    <p class="m-0">&copy; 2025 Mi Proyecto | Todos los derechos reservados</p>
+<footer class="footer mt-auto py-4 bg-dark text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <!-- Información de la empresa -->
+            <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                <h5 class="mb-2">
+                    <i class="bi bi-headset"></i> Sistema de Quejas
+                </h5>
+                <p class="mb-0 text-muted">&copy; {{ year|default:2025 }} Todos los derechos reservados</p>
+            </div>
+
+            <!-- Redes Sociales -->
+            <div class="col-md-6 text-center text-md-end">
+                <h6 class="mb-3">Síguenos en nuestras redes</h6>
+                <div class="social-media-links d-flex justify-content-center justify-content-md-end gap-3">
+                    <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" class="social-icon facebook" title="Facebook">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="social-icon instagram" title="Instagram">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                    <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" class="social-icon tiktok" title="TikTok">
+                        <i class="bi bi-tiktok"></i>
+                    </a>
+                    <a href="https://wa.me/50240066661" target="_blank" rel="noopener noreferrer" class="social-icon whatsapp" title="WhatsApp">
+                        <i class="bi bi-whatsapp"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% block extra_js %}{% endblock %}
+

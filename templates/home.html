@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block banner_home %}
+<div style="text-align: center; margin: 20px 0;">
+  <img src="{% static 'img/logo.png' %}" alt="Logo" style="max-height: 140px;">
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1 style="text-align:center;">Bienvenido</h1>
+  <p style="text-align:center;">Esta es la página principal.</p>
+</div>
+{% endblock %}

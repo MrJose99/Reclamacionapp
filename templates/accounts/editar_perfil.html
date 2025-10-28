@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% block title %}Editar Perfil{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px 15px 0 0;
+        padding: 2rem;
+        color: white;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .edit-profile-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .edit-profile-header h2 {
+        position: relative;
+        z-index: 1;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .edit-profile-card {
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        border: none;
+        overflow: hidden;
+        background: white;
+    }
+
+    .edit-profile-body {
+        padding: 2.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-label i {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 6px;
+        margin-right: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+        outline: none;
+    }
+
+    .form-control:hover, .form-select:hover {
+        border-color: #cbd5e0;
+    }
+
+    .form-text {
+        color: #718096;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .btn-custom {
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        font-size: 1rem;
+    }
+
+    .btn-custom-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-custom-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-custom-outline {
+        border: 2px solid #667eea;
+        color: #667eea;
+        background: white;
+    }
+
+    .btn-custom-outline:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .alert {
+        border-radius: 10px;
+        border: none;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        color: #721c24;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .form-section-title {
+        color: #2d3748;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-section-title i {
+        margin-right: 0.75rem;
+        color: #667eea;
+        font-size: 1.5rem;
+    }
+
+    .required-field::after {
+        content: '*';
+        color: #e53e3e;
+        margin-left: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .edit-profile-body {
+            padding: 1.5rem;
+        }
+
+        .btn-custom {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="edit-profile-card">
+                <!-- Header -->
+                <div class="edit-profile-header">
+                    <h2>
+                        <i class="bi bi-pencil-square me-2"></i>
+                        Editar Mi Perfil
+                    </h2>
+                </div>
+
+                <!-- Body con formulario -->
+                <div class="edit-profile-body">
+                    <!-- Mensajes -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% elif message.tags == 'error' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %} me-2"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Sección: Información Personal -->
+                        <div class="form-section">
+                            <h3 class="form-section-title">
+                                <i class="bi bi-person-fill"></i>
+                                Información Personal
+                            </h3>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label required-field">
+                                        <i class="bi bi-person-badge"></i>
+                                        Nombre
+                                    </label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="text-danger mt-1">
+                                            {% for error in form.first_name.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label required-field">
+                                        <i class="bi bi-person-badge-fill"></i>
+                                        Apellido
+                                    </label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="text-danger mt-1">
+                                            {% for error in form.last_name.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label required-field">
+                                    <i class="bi bi-envelope-fill"></i>
+                                    Correo Electrónico
+                                </label>
+                                {{ form.email }}
+                                <small class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Asegúrese de usar un correo válido para recibir notificaciones.
+                                </small>
+                                {% if form.email.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.email.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Sección: Información de Contacto -->
+                        <div class="form-section">
+                            <h3 class="form-section-title">
+                                <i class="bi bi-telephone-fill"></i>
+                                Información de Contacto
+                            </h3>
+
+                            <div class="mb-3">
+                                <label for="{{ form.telefono.id_for_label }}" class="form-label">
+                                    <i class="bi bi-phone"></i>
+                                    Teléfono
+                                </label>
+                                {{ form.telefono }}
+                                <small class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Formato: +1234567890 o 1234567890
+                                </small>
+                                {% if form.telefono.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.telefono.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.direccion.id_for_label }}" class="form-label">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                    Dirección
+                                </label>
+                                {{ form.direccion }}
+                                <small class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Dirección completa (opcional)
+                                </small>
+                                {% if form.direccion.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.direccion.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Sección: Información Adicional -->
+                        <div class="form-section">
+                            <h3 class="form-section-title">
+                                <i class="bi bi-calendar-heart"></i>
+                                Información Adicional
+                            </h3>
+
+                            <div class="mb-3">
+                                <label for="{{ form.fecha_nacimiento.id_for_label }}" class="form-label">
+                                    <i class="bi bi-calendar-event"></i>
+                                    Fecha de Nacimiento
+                                </label>
+                                {{ form.fecha_nacimiento }}
+                                <small class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Formato: DD/MM/AAAA
+                                </small>
+                                {% if form.fecha_nacimiento.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.fecha_nacimiento.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="text-center mt-4 pt-3">
+                            <a href="{% url 'accounts:perfil_usuario' %}" class="btn btn-custom btn-custom-outline me-2">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-custom btn-custom-primary">
+                                <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

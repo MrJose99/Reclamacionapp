@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Usuario{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">
+      <i class="bi bi-person-badge"></i>
+      Detalle de Usuario
+    </h2>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{% url 'accounts:listar_usuarios' %}">
+        <i class="bi bi-arrow-left"></i> Volver
+      </a>
+      <a class="btn btn-primary" href="{% url 'accounts:editar_usuario' usuario.id %}">
+        <i class="bi bi-pencil"></i> Editar
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-md-6">
+          <h5 class="text-muted">Información General</h5>
+          <ul class="list-unstyled mb-0">
+            <li><strong>Nombre: </strong> {{ usuario.get_full_name|default:usuario.username }}</li>
+            <li><strong>Usuario: </strong> {{ usuario.username }}</li>
+            <li><strong>Email: </strong> {{ usuario.email|default:"—" }}</li>
+            <li><strong>Rol: </strong> {{ usuario.get_rol_display|default:usuario.rol }}</li>
+            <li><strong>Estado: </strong>
+              {% if usuario.is_active %}
+                <span class="badge bg-success">Activo</span>
+              {% else %}
+                <span class="badge bg-secondary">Inactivo</span>
+              {% endif %}
+            </li>
+          </ul>
+        </div>
+
+        <div class="col-md-6">
+          <h5 class="text-muted">Datos de Perfil</h5>
+          <ul class="list-unstyled mb-0">
+            <li><strong>Fecha de nacimiento: </strong> {{ usuario.fecha_nacimiento|date:"Y-m-d"|default:"—" }}</li>
+            <li><strong>Teléfono: </strong> {{ usuario.telefono|default:"—" }}</li>
+            <li><strong>Dirección: </strong> {{ usuario.direccion|default:"—" }}</li>
+            <li><strong>Último ingreso: </strong> {{ usuario.last_login|date:"Y-m-d H:i"|default:"—" }}</li>
+            <li><strong>Fecha de alta: </strong> {{ usuario.date_joined|date:"Y-m-d H:i" }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr>
+
+      <h5 class="text-muted mb-3">Actividad</h5>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="p-3 border rounded">
+            <div class="d-flex justify-content-between align-items-center">
+              <span>Tickets creados</span>
+              <span class="badge bg-primary">
+                {{ usuario.tickets_creados.count|default:0 }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 border rounded">
+            <div class="d-flex justify-content-between align-items-center">
+              <span>Tickets asignados (agente)</span>
+              <span class="badge bg-info">
+                {{ usuario.tickets_asignados.count|default:0 }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 border rounded">
+            <div class="d-flex justify-content-between align-items-center">
+              <span>Tickets técnicos</span>
+              <span class="badge bg-warning text-dark">
+                {{ usuario.tickets_tecnicos.count|default:0 }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if usuario.bio %}
+      <hr>
+      <h5 class="text-muted">Bio</h5>
+      <p class="mb-0">{{ usuario.bio }}</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

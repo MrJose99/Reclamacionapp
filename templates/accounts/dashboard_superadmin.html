@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Dashboard Administrador{% endblock %}
+{% block content %}
+<div class="py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Dashboard Administrador</h2>
+      <a href="{% url 'tickets:tickets_sin_asignar' %}" class="btn btn-primary">
+  <i class="bi bi-inbox"></i> Ver tickets sin asignar ({{ tickets_sin_asignar }})
+</a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'accounts:listar_usuarios' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-people"></i> Gestión de usuarios
+      </a>
+      <a href="{% url 'tickets:listar_tickets' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-ticket-perforated"></i> Ver tickets
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-6 col-md-3">
+      <div class="card card-stats shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small">Usuarios totales</div>
+          <div class="fs-4 fw-semibold">{{ total_usuarios }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card card-stats success shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small">Clientes</div>
+          <div class="fs-4 fw-semibold">{{ total_clientes }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card card-stats warning shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small">Empleados</div>
+          <div class="fs-4 fw-semibold">{{ total_empleados }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card card-stats danger shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small">Tickets totales</div>
+          <div class="fs-4 fw-semibold">{{ total_tickets }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-6 col-md-3">
+      <div class="card border-warning shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small">Tickets abiertos</div>
+          <div class="fs-5 fw-semibold text-warning">{{ tickets_abiertos }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-success shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small">Tickets resueltos</div>
+          <div class="fs-5 fw-semibold text-success">{{ tickets_resueltos }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-4 shadow-sm">
+    <div class="card-header">
+      Tickets recientes
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0 table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Estado</th>
+              <th>Prioridad</th>
+              <th>Asignado a</th>
+              <th>Creado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in tickets_recientes %}
+            <tr>
+              <td><a href="{% url 'tickets:detalle_ticket' t.id %}">#{{ t.id }}</a></td>
+              <td>{{ t.cliente.get_full_name|default:t.cliente.username }}</td>
+              <td><span class="badge text-bg-secondary">{{ t.get_estado_display }}</span></td>
+              <td>
+                {% if t.prioridad == 'critica' %}
+                  <span class="badge text-bg-danger">Crítica</span>
+                {% elif t.prioridad == 'alta' %}
+                  <span class="badge text-bg-warning">Alta</span>
+                {% elif t.prioridad == 'media' %}
+                  <span class="badge text-bg-info">Media</span>
+                {% else %}
+                  <span class="badge text-bg-light text-dark">Baja</span>
+                {% endif %}
+              </td>
+              <td>  
+                {% if t.agente %}  
+                  {{ t.agente.get_full_name|default:t.agente.username }}  
+                {% elif t.tecnico %}  
+                  {{ t.tecnico.get_full_name|default:t.tecnico.username }}  
+                {% else %}  
+                  —  
+                {% endif %}  
+              </td>              
+              <td>{{ t.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center py-4">No hay tickets recientes</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
